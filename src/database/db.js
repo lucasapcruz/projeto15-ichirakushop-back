@@ -13,3 +13,11 @@ try {
 }
 
 db = mongoClient.db("API_Ichiraku-shop");
+
+const registeredUsers = db.collection("participants");
+const onlineUsers = db.collection("session");
+
+export {
+    registeredUsers,
+    onlineUsers
+}
