@@ -1,6 +1,6 @@
 import { signUpSchema } from "../Models/signUpSchema.model.js";
 import bcrypt from "bcrypt";
-import { registeredUsers } from "../db/index.js";
+import { registeredUsers } from "../database/db.js";
 
 export async function signUpValidation(req, res, next) {
     const user = req.body

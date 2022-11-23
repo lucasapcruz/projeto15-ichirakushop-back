@@ -1,4 +1,4 @@
-import { registeredUsers, onlineUsers } from "../db/index.js";
+import { registeredUsers } from "../database/db.js";
 
 export async function signUp(req,res){
 
