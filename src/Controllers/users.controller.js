@@ -30,3 +30,15 @@ export async function signIn(req, res) {
     res.sendStatus(500);
   }
 }
+
+export async function getUser(req, res) {
+  const user = res.locals.user;
+
+  try {
+    const userInfo = await registeredUsers.find({ _id: user._id }).toArray();
+    res.send(userInfo);
+  } catch (err) {
+    console.log(err);
+    res.sendStatus(500);
+  }
+}
