@@ -1,3 +1,4 @@
+import { ObjectId } from "mongodb";
 import { orders } from "../database/db.js";
 
 export async function createOrder(req, res) {
@@ -9,7 +10,7 @@ export async function createOrder(req, res) {
 
     try {
         await orders.insertOne(orderRecord);
-        res.status(201).send("Pedido criado!");
+        res.status(201).send(orderRecord);
     } catch (err) {
         console.log(err);
         res.sendStatus(500);
@@ -18,6 +19,29 @@ export async function createOrder(req, res) {
 
 export async function updateOrder(req, res) {
     const user = res.locals.user;
+    const updatePayload = req.body
+    console.log(updatePayload)
+
+    try {
+        await orders
+            .updateOne({
+                _id: new ObjectId(updatePayload.orderId)
+            },
+                {
+                    $set: {
+                        products: updatePayload.products,
+                        totalPrice: updatePayload.totalPrice,
+                        isFinished: updatePayload.isFinished,
+                        updatedDate: Date.now()
+                    }
+                })
+
+        res.sendStatus(200)
+
+    } catch (error) {
+        res.sendStatus(500);
+    }
+
 }
 
 export async function getOrders(req, res) {
@@ -62,3 +86,28 @@ export async function getOrders(req, res) {
     //     res.sendStatus(500);
     // }
 }
+
+// await orders
+//     .updateOne({
+//         _id: new ObjectId(updatePayload.orderId)
+//     },
+//         {
+//             $set: {
+//                 products: updatePayload.products,
+//                 totalPrice: updatePayload.totalPrice,
+//                 isFinished: updatePayload.isFinished,
+//                 updatedDate: Date.now()
+//             },
+//         }
+//         // {
+//         //     $set: {
+//         //         finishedDate: {
+//         //             $cond: {
+//         //                 if: { $isFinished },
+//         //                 then: $updatedDate,
+//         //                 else: $finishedDate
+//         //             }
+//         //         }
+//         //     }
+//         // }])
+//     )
