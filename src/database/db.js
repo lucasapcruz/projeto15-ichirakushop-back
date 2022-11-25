@@ -16,8 +16,10 @@ db = mongoClient.db("API_Ichiraku-shop");
 
 const registeredUsers = db.collection("participants");
 const onlineUsers = db.collection("session");
+const orders = db.collection("orders"); 
 
 export {
     registeredUsers,
-    onlineUsers
+    onlineUsers,
+    orders
 }
