@@ -19,13 +19,14 @@ export async function createOrder(req, res) {
 
 export async function updateOrder(req, res) {
     const user = res.locals.user;
+    const orderId = res.params.orderId
     const updatePayload = req.body
     console.log(updatePayload)
 
     try {
         await orders
             .updateOne({
-                _id: new ObjectId(updatePayload.orderId)
+                _id: new ObjectId(orderId)
             },
                 {
                     $set: {

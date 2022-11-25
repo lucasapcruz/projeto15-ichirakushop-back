@@ -7,7 +7,7 @@ import { orderCreationValidation } from "../Middlewares/orderCreationSchemaValid
 const ordersRoute = Router();
 
 ordersRoute.post("/order", authRoutesValidation, orderCreationValidation, createOrder);
-ordersRoute.put("/order", authRoutesValidation, updateOrder);
+ordersRoute.put("/order/:orderId", authRoutesValidation, updateOrder);
 ordersRoute.delete("/order/:orderId", authRoutesValidation, deleteOrder);
 ordersRoute.get("/orders", authRoutesValidation, getOrders);
 
