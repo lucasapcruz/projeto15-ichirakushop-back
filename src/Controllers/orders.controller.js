@@ -1,3 +1,4 @@
+import { ObjectId } from "mongodb";
 import { orders } from "../database/db.js";
 
 export async function createOrder(req, res) {
@@ -9,7 +10,7 @@ export async function createOrder(req, res) {
 
     try {
         await orders.insertOne(orderRecord);
-        res.status(201).send("Pedido criado!");
+        res.status(201).send(orderRecord);
     } catch (err) {
         console.log(err);
         res.sendStatus(500);
@@ -18,7 +19,33 @@ export async function createOrder(req, res) {
 
 export async function updateOrder(req, res) {
     const user = res.locals.user;
+    const orderId = res.params.orderId
+    const updatePayload = req.body
+    console.log(updatePayload)
+
+    try {
+        await orders
+            .updateOne({
+                _id: new ObjectId(orderId)
+            },
+                {
+                    $set: {
+                        products: updatePayload.products,
+                        totalPrice: updatePayload.totalPrice,
+                        isFinished: updatePayload.isFinished,
+                        updatedDate: Date.now()
+                    }
+                })
+
+        res.sendStatus(200)
+
+    } catch (error) {
+        res.sendStatus(500);
+    }
+
 }
+
+
 
 export async function getOrders(req, res) {
     const user = res.locals.user;
@@ -38,27 +65,22 @@ export async function getOrders(req, res) {
     } catch (error) {
         res.sendStatus(500);
     }
+}
 
-    // try {
-    //     if (limit) {
-    //         const orders = await orders
-    //             .find({ userId: user._id })
-    //             .sort({ finishedDate: -1 })
-    //             .limit(parseInt(limit))
-    //             .toArray();
-    //         res.status(200).send(orders);
-    //         return;
-    //     }
+export async function deleteOrder(req, res) {
+    const user = res.locals.user;
+    const orderId = req.params.orderId
 
-    //     const messages = await db
-    //         .collection("messages")
-    //         .find({
-    //             $or: [{ to: participant }, { from: participant }],
-    //         })
-    //         .sort({ time: -1 })
-    //         .toArray();
-    //     res.status(200).send(messages);
-    // } catch (error) {
-    //     res.sendStatus(500);
-    // }
+    try {
+        await orders
+            .deleteOne({
+                _id: new ObjectId(orderId)
+            })
+
+        res.sendStatus(200)
+
+    } catch (error) {
+        res.sendStatus(500);
+    }
+
 }
