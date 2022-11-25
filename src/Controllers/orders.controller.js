@@ -44,6 +44,8 @@ export async function updateOrder(req, res) {
 
 }
 
+
+
 export async function getOrders(req, res) {
     const user = res.locals.user;
 
@@ -62,52 +64,22 @@ export async function getOrders(req, res) {
     } catch (error) {
         res.sendStatus(500);
     }
-
-    // try {
-    //     if (limit) {
-    //         const orders = await orders
-    //             .find({ userId: user._id })
-    //             .sort({ finishedDate: -1 })
-    //             .limit(parseInt(limit))
-    //             .toArray();
-    //         res.status(200).send(orders);
-    //         return;
-    //     }
-
-    //     const messages = await db
-    //         .collection("messages")
-    //         .find({
-    //             $or: [{ to: participant }, { from: participant }],
-    //         })
-    //         .sort({ time: -1 })
-    //         .toArray();
-    //     res.status(200).send(messages);
-    // } catch (error) {
-    //     res.sendStatus(500);
-    // }
 }
 
-// await orders
-//     .updateOne({
-//         _id: new ObjectId(updatePayload.orderId)
-//     },
-//         {
-//             $set: {
-//                 products: updatePayload.products,
-//                 totalPrice: updatePayload.totalPrice,
-//                 isFinished: updatePayload.isFinished,
-//                 updatedDate: Date.now()
-//             },
-//         }
-//         // {
-//         //     $set: {
-//         //         finishedDate: {
-//         //             $cond: {
-//         //                 if: { $isFinished },
-//         //                 then: $updatedDate,
-//         //                 else: $finishedDate
-//         //             }
-//         //         }
-//         //     }
-//         // }])
-//     )
+export async function deleteOrder(req, res) {
+    const user = res.locals.user;
+    const orderId = req.params.orderId
+
+    try {
+        await orders
+            .deleteOne({
+                _id: new ObjectId(orderId)
+            })
+
+        res.sendStatus(200)
+
+    } catch (error) {
+        res.sendStatus(500);
+    }
+
+}
