@@ -17,9 +17,9 @@ export async function createOrder(req, res) {
     }
 }
 
-export async function updateOrder(req, res) {
+export async function updateOrderStatus(req, res) {
     const user = res.locals.user;
-    const orderId = res.params.orderId
+    const orderId = req.params.orderId
     const updatePayload = req.body
     console.log(updatePayload)
 
@@ -30,8 +30,6 @@ export async function updateOrder(req, res) {
             },
                 {
                     $set: {
-                        products: updatePayload.products,
-                        totalPrice: updatePayload.totalPrice,
                         isFinished: updatePayload.isFinished,
                         updatedDate: Date.now()
                     }
@@ -45,6 +43,39 @@ export async function updateOrder(req, res) {
 
 }
 
+
+export async function updateOrderProducts(req, res) {
+    const user = res.locals.user;
+    const orderId = req.params.orderId
+    const updatePayload = req.body
+
+
+    let newTotalPrice = 0;
+    
+    updatePayload.forEach(element => {
+        newTotalPrice += element.price
+    });
+
+    try {
+        await orders
+            .updateOne({
+                _id: new ObjectId(orderId)
+            },
+                {
+                    $set: {
+                        products: updatePayload,
+                        totalPrice: newTotalPrice,
+                        updatedDate: Date.now()
+                    }
+                })
+
+        res.sendStatus(200)
+
+    } catch (error) {
+        res.sendStatus(500);
+    }
+
+}
 
 
 export async function getOrders(req, res) {
