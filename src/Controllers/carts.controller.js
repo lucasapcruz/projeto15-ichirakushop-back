@@ -1,14 +1,19 @@
 import { ObjectId } from "mongodb";
 import { orders } from "../database/db.js";
 
-export async function createOrder(req, res) {
+export async function createCart(req, res) {
     const user = res.locals.user;
-    console.log(user)
-    const order = req.body
-
-    const orderRecord = { ...order, createdDate: Date.now(), finishedDate: Date.now(), updatedDate: Date.now() }
+    const userId = user._id.toString()
+    const { products } = req.body
 
     try {
+
+        let totalPrice = 0;
+        products.forEach(element => {
+            totalPrice += element.price
+        });
+
+        const cart = { userId, ...payload }
         await orders.insertOne(orderRecord);
         res.status(201).send(orderRecord);
     } catch (err) {
@@ -17,34 +22,7 @@ export async function createOrder(req, res) {
     }
 }
 
-export async function updateOrderStatus(req, res) {
-    const user = res.locals.user;
-    const orderId = req.params.orderId
-    const updatePayload = req.body
-    console.log(updatePayload)
-
-    try {
-        await orders
-            .updateOne({
-                _id: new ObjectId(orderId)
-            },
-                {
-                    $set: {
-                        isFinished: updatePayload.isFinished,
-                        updatedDate: Date.now()
-                    }
-                })
-
-        res.sendStatus(200)
-
-    } catch (error) {
-        res.sendStatus(500);
-    }
-
-}
-
-
-export async function updateOrderProducts(req, res) {
+export async function updateCart(req, res) {
     const user = res.locals.user;
     const orderId = req.params.orderId
     const updatePayload = req.body
@@ -78,7 +56,7 @@ export async function updateOrderProducts(req, res) {
 }
 
 
-export async function getOrders(req, res) {
+export async function getCart(req, res) {
     const user = res.locals.user;
 
     const limit = req.query.limit;
@@ -98,7 +76,7 @@ export async function getOrders(req, res) {
     }
 }
 
-export async function deleteOrder(req, res) {
+export async function deleteCart(req, res) {
     const user = res.locals.user;
     const orderId = req.params.orderId
 
