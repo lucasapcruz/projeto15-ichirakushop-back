@@ -1,6 +1,5 @@
 import { Router } from "express";
-import { deleteOrder } from "../Controllers/orders.controller.js";
-import { createOrder, updateOrderProducts, updateOrderStatus, getOrders } from "../Controllers/orders.controller.js";
+import { createOrder, getOrders } from "../Controllers/orders.controller.js";
 import { authRoutesValidation } from "../Middlewares/authRoutesValidation.middleware.js";
 import { orderCreationValidation } from "../Middlewares/orderCreationSchemaValidation.middleware.js";
 
