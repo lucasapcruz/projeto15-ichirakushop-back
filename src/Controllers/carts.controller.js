@@ -1,5 +1,5 @@
 import { ObjectId } from "mongodb";
-import { orders } from "../database/db.js";
+import { carts, productsCollection } from "../database/db.js";
 
 export async function createCart(req, res) {
     const user = res.locals.user;
@@ -8,14 +8,27 @@ export async function createCart(req, res) {
 
     try {
 
-        let totalPrice = 0;
-        products.forEach(element => {
-            totalPrice += element.price
-        });
+        const promises = products.map(async (element) => {
+            const { price } = await productsCollection.findOne({ _id: new ObjectId(element.productId) })
+            return { ...element, price }
+        })
 
-        const cart = { userId, ...payload }
-        await orders.insertOne(orderRecord);
-        res.status(201).send(orderRecord);
+        const productsWithPrice = await Promise.all(promises)
+
+        let initialValue = 0
+        const totalPrice = productsWithPrice.reduce((totalValue, currentValue) => {
+            return totalValue + currentValue.price*currentValue.productQt
+        }, initialValue)
+
+        const cart = {
+            userId,
+            products: productsWithPrice,
+            totalPrice,
+            createdDate: Date.now(),
+            updatedDate: Date.now()
+        }
+        await carts.insertOne(cart);
+        res.status(201).send(cart);
     } catch (err) {
         console.log(err);
         res.sendStatus(500);
@@ -24,24 +37,33 @@ export async function createCart(req, res) {
 
 export async function updateCart(req, res) {
     const user = res.locals.user;
-    const orderId = req.params.orderId
-    const updatePayload = req.body
+    const cartId = req.params.cartId
+    const { products } = req.body
 
-
-    let newTotalPrice = 0;
-
-    updatePayload.forEach(element => {
-        newTotalPrice += element.price
-    });
 
     try {
-        await orders
+
+        const promises = products.map(async (element) => {
+            const { price } = await productsCollection.findOne({ _id: new ObjectId(element.productId) })
+            return { ...element, price }
+        })
+
+        const newProcuctsWithPrice = await Promise.all(promises)
+
+        let initialValue = 0
+        const newTotalPrice = newProcuctsWithPrice.reduce((totalValue, currentValue) => {
+            return totalValue + currentValue.price*currentValue.productQt
+        }, initialValue)
+
+
+
+        await carts
             .updateOne({
-                _id: new ObjectId(orderId)
+                _id: new ObjectId(cartId)
             },
                 {
                     $set: {
-                        products: updatePayload,
+                        products: newProcuctsWithPrice,
                         totalPrice: newTotalPrice,
                         updatedDate: Date.now()
                     }
@@ -58,16 +80,15 @@ export async function updateCart(req, res) {
 
 export async function getCart(req, res) {
     const user = res.locals.user;
-
+    const cartId = req.params.cartId
     const limit = req.query.limit;
 
     console.log(user._id)
     try {
 
-        const cart = await orders
+        const cart = await carts
             .findOne({
-                userId: user._id.toString(),
-                isFinished: false
+                _id: new ObjectId(cartId)
             })
         res.status(200).send(cart);
 
@@ -78,12 +99,12 @@ export async function getCart(req, res) {
 
 export async function deleteCart(req, res) {
     const user = res.locals.user;
-    const orderId = req.params.orderId
+    const cartId = req.params.cartId
 
     try {
-        await orders
+        await carts
             .deleteOne({
-                _id: new ObjectId(orderId)
+                _id: new ObjectId(cartId)
             })
 
         res.sendStatus(200)
