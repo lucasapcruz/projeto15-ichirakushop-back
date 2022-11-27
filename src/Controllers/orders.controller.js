@@ -1,14 +1,25 @@
-import { ObjectId } from "mongodb";
-import { orders } from "../database/db.js";
+import { Db, ObjectId } from "mongodb";
+import { carts, orders } from "../database/db.js";
 
 export async function createOrder(req, res) {
     const user = res.locals.user;
-    console.log(user)
-    const order = req.body
-
-    const orderRecord = { ...order, createdDate: Date.now(), finishedDate: Date.now(), updatedDate: Date.now() }
+    const userId = user._id.toString()
+    const { cartId } = req.body
 
     try {
+        const cart = await carts.findOne(new ObjectId(cartId))
+        const shippingAdress = `${user.street}, ${user.houseNumber}`
+
+        const orderRecord = {
+            userId,
+            shippingAdress,
+            products: cart.products,
+            totalAmout: cart.totalPrice, 
+            createdDate: Date.now(),
+            updatedDate: Date.now()
+        }
+
+
         await orders.insertOne(orderRecord);
         res.status(201).send(orderRecord);
     } catch (err) {
@@ -17,101 +28,34 @@ export async function createOrder(req, res) {
     }
 }
 
-export async function updateOrderStatus(req, res) {
-    const user = res.locals.user;
-    const orderId = req.params.orderId
-    const updatePayload = req.body
-    console.log(updatePayload)
-
-    try {
-        await orders
-            .updateOne({
-                _id: new ObjectId(orderId)
-            },
-                {
-                    $set: {
-                        isFinished: updatePayload.isFinished,
-                        updatedDate: Date.now()
-                    }
-                })
-
-        res.sendStatus(200)
-
-    } catch (error) {
-        res.sendStatus(500);
-    }
-
-}
-
-
-export async function updateOrderProducts(req, res) {
-    const user = res.locals.user;
-    const orderId = req.params.orderId
-    const updatePayload = req.body
-
-
-    let newTotalPrice = 0;
-
-    updatePayload.forEach(element => {
-        newTotalPrice += element.price
-    });
-
-    try {
-        await orders
-            .updateOne({
-                _id: new ObjectId(orderId)
-            },
-                {
-                    $set: {
-                        products: updatePayload,
-                        totalPrice: newTotalPrice,
-                        updatedDate: Date.now()
-                    }
-                })
-
-        res.sendStatus(200)
-
-    } catch (error) {
-        res.sendStatus(500);
-    }
-
-}
-
-
 export async function getOrders(req, res) {
     const user = res.locals.user;
-
+    const userId = user._id.toString()
     const limit = req.query.limit;
 
-    console.log(user._id)
     try {
 
-        const cart = await orders
-            .findOne({
-                userId: user._id.toString(),
-                isFinished: false
+        if(limit){
+            const ordersArray = await orders
+            .find({
+                userId
             })
-        res.status(200).send(cart);
+            .sort({ createdDate: -1 })
+            .limit(parseInt(limit))
+            .toArray()
+            res.status(200).send(ordersArray);
+            return
+        }
+
+        const ordersArray = await orders
+            .find({
+                userId
+            })
+            .sort({ createdDate: -1 })
+            .toArray()
+        res.status(200).send(ordersArray);
 
     } catch (error) {
         res.sendStatus(500);
     }
-}
-
-export async function deleteOrder(req, res) {
-    const user = res.locals.user;
-    const orderId = req.params.orderId
-
-    try {
-        await orders
-            .deleteOne({
-                _id: new ObjectId(orderId)
-            })
-
-        res.sendStatus(200)
-
-    } catch (error) {
-        res.sendStatus(500);
-    }
-
 }
