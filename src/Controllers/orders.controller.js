@@ -40,7 +40,7 @@ export async function getOrders(req, res) {
             .find({
                 userId
             })
-            .sort({ createdTime: -1 })
+            .sort({ createdDate: -1 })
             .limit(parseInt(limit))
             .toArray()
             res.status(200).send(ordersArray);
@@ -51,7 +51,7 @@ export async function getOrders(req, res) {
             .find({
                 userId
             })
-            .sort({ createdTime: -1 })
+            .sort({ createdDate: -1 })
             .toArray()
         res.status(200).send(ordersArray);
 
