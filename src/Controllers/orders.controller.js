@@ -4,7 +4,7 @@ import { orders } from "../database/db.js";
 export async function createOrder(req, res) {
     const user = res.locals.user;
     const userId = user._id.toString()
-    const {cartId} = req.body
+    const { cartId } = req.body
 
     const orderRecord = {
         userId,
@@ -29,11 +29,25 @@ export async function getOrders(req, res) {
 
     try {
 
-        const ordersArray = await orders
-            .findOne({
+        if(limit){
+            const ordersArray = await orders
+            .find({
                 userId
             })
-        res.status(200).send(cart);
+            .sort({ createdTime: -1 })
+            .limit(parseInt(limit))
+            .toArray()
+            res.status(200).send(ordersArray);
+            return
+        }
+
+        const ordersArray = await orders
+            .find({
+                userId
+            })
+            .sort({ createdTime: -1 })
+            .toArray()
+        res.status(200).send(ordersArray);
 
     } catch (error) {
         res.sendStatus(500);
