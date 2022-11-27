@@ -8,7 +8,7 @@ export async function createOrder(req, res) {
 
     try {
         const cart = await carts.findOne(new ObjectId(cartId))
-        const shippingAdress = `${user.adress}, ${user.houseNumber}`
+        const shippingAdress = `${user.street}, ${user.houseNumber}`
 
         const orderRecord = {
             userId,
