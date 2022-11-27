@@ -116,3 +116,18 @@ export async function deleteCart(req, res) {
     }
 
 }
+
+export async function getUserCart(req,res) {
+    const user = res.locals.user
+
+    try{
+        const cart = await carts.findOne({userId: ObjectId(user._id)})
+        if(!cart){
+            res.sendStatus(401)
+        }
+        res.send(cart)
+    }catch(err){
+        console.log(err)
+        res.sendStatus(500)
+    }
+}

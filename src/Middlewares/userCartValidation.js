@@ -1,4 +1,4 @@
-import { onlineUsers, registeredUsers } from "../database/db.js";
+import { carts, onlineUsers, registeredUsers } from "../database/db.js";
 
 export async function userCartValidation(req, res, next) {
   const { authorization } = req.headers;
@@ -15,8 +15,13 @@ export async function userCartValidation(req, res, next) {
     if (!user) {
       return res.sendStatus(401);
     }
+    const validateNewCart = await carts.findOne({userId: user._id})
+    console.log(validateNewCart)
+    if(validateNewCart){
+        return 
+    }
 
-    res.locals.user = user._id;
+    res.locals.userId = user._id;
   } catch (err) {
     console.log(err);
     res.sendStatus(500);
