@@ -1,3 +1,4 @@
+import { ObjectId } from "mongodb"
 import { productsCollection } from "../database/db.js"
 
 export async function getProducts(req,res){
@@ -24,6 +25,21 @@ export async function getProducts(req,res){
         }
         
         res.send(products)
+    }catch(err){
+        console.log(err)
+        res.sendStatus(500)
+    }
+}
+
+export async function getProductsById(req,res){
+
+    const {productId} = req.params
+
+    try{
+
+        const product = await productsCollection.findOne({ _id : new ObjectId(productId) })
+
+        res.send(product)
     }catch(err){
         console.log(err)
         res.sendStatus(500)
