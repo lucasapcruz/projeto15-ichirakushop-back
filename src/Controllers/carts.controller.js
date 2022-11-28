@@ -65,7 +65,7 @@ export async function updateCart(req, res) {
                 {
                     $set: {
                         products: producsWithPrice,
-                        totalPrice: newTotalPrice,
+                        totalPrice: newTotalPrice.toFixed(2),
                         updatedDate: Date.now()
                     }
                 })
