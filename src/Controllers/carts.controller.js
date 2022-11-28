@@ -51,7 +51,27 @@ export async function updateCart(req, res) {
         })
 
         const newProcuctsWithPrice = await Promise.all(promises)
-        const producsWithPrice = [...cart.products, ...newProcuctsWithPrice]
+
+        const producsWithPrice = [...cart.products]
+
+        newProcuctsWithPrice.forEach((element) => {
+            const productInCart = producsWithPrice.find((product) => {
+                return product.productId === element.productId
+            })
+            if(!productInCart){
+                producsWithPrice.push(element)
+            }else{
+                if(element.productQt>0){
+                    productInCart.productQt = element.productQt
+                }else{
+                    producsWithPrice = producsWithPrice.filter((product) => {
+                        return product.productId !== element.productId
+                    })
+                }
+            }
+        })
+        
+        //const producsWithPrice = [...cart.products, ...newProcuctsWithPrice]
 
         let initialValue = 0
         const newTotalPrice = producsWithPrice.reduce((totalValue, currentValue) => {
@@ -70,7 +90,9 @@ export async function updateCart(req, res) {
                     }
                 })
 
-        res.sendStatus(200)
+        const updatedCart = await carts.findOne({_id: new ObjectId(cartId)})
+
+        res.status(200).send(updatedCart)
 
     } catch (error) {
         console.log(error)
@@ -123,7 +145,7 @@ export async function getUserCart(req,res) {
     try{
         const cart = await carts.findOne({userId: ObjectId(user._id)})
         if(!cart){
-            res.sendStatus(401)
+            res.sendStatus(500)
         }
         res.send(cart)
     }catch(err){
