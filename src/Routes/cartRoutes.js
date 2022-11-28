@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { createCart, deleteCart, getCart, getUserCart, updateCart } from "../Controllers/carts.controller.js";
+import { createCart, deleteCart, getCart, getUserCart, tranferCartProducts, updateCart } from "../Controllers/carts.controller.js";
 import { authRoutesValidation } from "../Middlewares/authRoutesValidation.middleware.js";
 import { cartCreationValidation } from "../Middlewares/cartCreationSchemaValidation.middleware.js";
 import { cartIdValidation } from "../Middlewares/cartIdValidation.js";
@@ -12,5 +12,6 @@ cartRoute.put("/cart/:cartId/products",cartIdValidation, updateCart);
 cartRoute.delete("/cart/:cartId", authRoutesValidation, deleteCart);
 cartRoute.get("/cart/:cartId", getCart);
 cartRoute.get("/cart", authRoutesValidation, getUserCart);
+cartRoute.put("/cart/:cartId", authRoutesValidation, tranferCartProducts);
 
 export default cartRoute;
