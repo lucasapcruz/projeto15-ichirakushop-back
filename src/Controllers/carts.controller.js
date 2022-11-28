@@ -2,8 +2,9 @@ import { ObjectId } from "mongodb";
 import { carts, productsCollection } from "../database/db.js";
 
 export async function createCart(req, res) {
-    const user = res.locals.user;
-    const userId = user._id.toString()
+    const userId = res.locals.userId;
+    //const user = res.locals.user;
+    //const userId = user._id.toString()
     const { products } = req.body
 
     try {
@@ -42,6 +43,7 @@ export async function updateCart(req, res) {
 
 
     try {
+        const cart = await carts.findOne({_id: new ObjectId(cartId)})
 
         const promises = products.map(async (element) => {
             const { price } = await productsCollection.findOne({ _id: new ObjectId(element.productId) })
@@ -49,13 +51,12 @@ export async function updateCart(req, res) {
         })
 
         const newProcuctsWithPrice = await Promise.all(promises)
+        const producsWithPrice = [...cart.products, ...newProcuctsWithPrice]
 
         let initialValue = 0
-        const newTotalPrice = newProcuctsWithPrice.reduce((totalValue, currentValue) => {
+        const newTotalPrice = producsWithPrice.reduce((totalValue, currentValue) => {
             return totalValue + currentValue.price*currentValue.productQt
         }, initialValue)
-
-
 
         await carts
             .updateOne({
@@ -63,8 +64,8 @@ export async function updateCart(req, res) {
             },
                 {
                     $set: {
-                        products: newProcuctsWithPrice,
-                        totalPrice: newTotalPrice,
+                        products: producsWithPrice,
+                        totalPrice: newTotalPrice.toFixed(2),
                         updatedDate: Date.now()
                     }
                 })
@@ -72,6 +73,7 @@ export async function updateCart(req, res) {
         res.sendStatus(200)
 
     } catch (error) {
+        console.log(error)
         res.sendStatus(500);
     }
 
@@ -83,7 +85,7 @@ export async function getCart(req, res) {
     const cartId = req.params.cartId
     const limit = req.query.limit;
 
-    console.log(user._id)
+    //console.log(user._id)
     try {
 
         const cart = await carts
@@ -113,4 +115,19 @@ export async function deleteCart(req, res) {
         res.sendStatus(500);
     }
 
+}
+
+export async function getUserCart(req,res) {
+    const user = res.locals.user
+
+    try{
+        const cart = await carts.findOne({userId: ObjectId(user._id)})
+        if(!cart){
+            res.sendStatus(401)
+        }
+        res.send(cart)
+    }catch(err){
+        console.log(err)
+        res.sendStatus(500)
+    }
 }

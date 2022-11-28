@@ -6,5 +6,5 @@ const productsSchema = joi.object({
 })
 
 export const cartCreationSchema = joi.object({
-    products: joi.array().items(productsSchema).required().min(1)
+    products: joi.array().items(productsSchema).required()
 })
