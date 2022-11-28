@@ -131,3 +131,26 @@ export async function getUserCart(req,res) {
         res.sendStatus(500)
     }
 }
+
+export async function tranferCartProducts(req,res){
+    const user = res.locals.user
+    const {cartId} = req.params
+
+    try{
+        const noSigninCart = await carts. findOne({_id: ObjectId(cartId)})
+        if(!noSigninCart){
+            return res.sendStatus(422)
+        }
+        await carts.updateOne({userId: ObjectId(user._id)}, {$set: {
+            products: noSigninCart.products,
+            totalPrice: noSigninCart.totalPrice,
+            updatedDate: Date.now()
+        }})
+
+        res.sendStatus(200)
+
+    }catch(err){
+        console.log(err)
+        res.sendStatus(500)
+    }
+}
